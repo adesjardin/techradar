@@ -1,5 +1,5 @@
 //This is the title for your window tab, and your Radar
-document.title = "WotifGroup's Technology Radar (December 2014)";
+document.title = "AVIO Consulting Technology Radar (December 2015)";
 
 
 //This is the concentic circles that want on your radar
@@ -46,11 +46,11 @@ var radar_arcs = [
 //      Note: there's no "avoid" ring, but throw things in the hold ring that people shouldn't use.
 
 var h = 1000;
-var w = 1200;
+var w = 1300;
 
 var radar_data = [
-    { "quadrant": "Techniques",
-        "left" : 45,
+    { "quadrant": "Techniques & Processes",
+        "left" : 10,
         "top" : 18,
         "color" : "#8FA227",
         "items" : [ 
@@ -86,7 +86,7 @@ var radar_data = [
         ]
     },
     { "quadrant": "Tools",
-        "left": w-200+30,
+        "left": w-250+30,
         "top" : 18,
         "color" : "#587486",
         "items" : [ 
@@ -129,13 +129,13 @@ var radar_data = [
   { name: 'Subversion',    pc: { r: 330, t: 18 },    movement: 'c' }
   ]
     },
-    { "quadrant": "Platforms",
-        "left" :45,
+    { "quadrant": "Platforms & Products",
+        "left" :10,
          "top" : (h/2 + 18),
         "color" : "#DC6F1D",
         "items" : [
 
-            {"name":"OpenId Connect", "pc":{"r":130,"t":260},"movement":"t"},   
+            {"name":"Oracle PCS", "pc":{"r":130,"t":260},"movement":"t", "blipSize" : 100, "url" : "http://cloud.oracle.com"},   
             {"name":"Location based services", "pc":{"r":130,"t":230},"movement":"c"},
             {"name":"Openstack", "pc":{"r":190,"t":190},"movement":"c"},
             {"name":"RHEL 7", "pc":{"r":170,"t":215},"movement":"c"},      
@@ -170,7 +170,7 @@ var radar_data = [
     },
     { "quadrant": "Languages & Frameworks",
         "color" : "#B70062",
-        "left"  : (w-200+30),
+        "left"  : (w-250+30),
         "top" :   (h/2 + 18),
         "items" : [ 
             { name: 'CDI', pc: { r: 60, t: 290 },  movement: 'c' },
