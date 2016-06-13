@@ -1,7 +1,7 @@
 function init(h,w) {
   $('#title').text(document.title);  
 	   
- var radar = new pv.Panel()
+var radar = new pv.Panel()
       .width(w)
       .height(h)
       .canvas('radar')
@@ -33,34 +33,6 @@ radar.add(pv.Line)
         .strokeStyle("#bbb");
 
 
-// blips
-// var total_index=1;
-// for (var i = 0; i < radar_data.length; i++) {
-//     radar.add(pv.Dot)       
-//     .def("active", false)
-//     .data(radar_data[i].items)
-//     .size( function(d) { return ( d.blipSize !== undefined ? d.blipSize : 70 ); })
-//     .left(function(d) { var x = polar_to_raster(d.pc.r, d.pc.t)[0];
-//                         //console.log("name:" + d.name + ", x:" + x); 
-//                         return x;})
-//     .bottom(function(d) { var y = polar_to_raster(d.pc.r, d.pc.t)[1];                                 
-//                           //console.log("name:" + d.name + ", y:" + y); 
-//                           return y;})
-//     .title(function(d) { return d.name;})		 
-//     .cursor( function(d) { return ( d.url !== undefined ? "pointer" : "auto" ); })                                                            
-//     .event("click", function(d) { if ( d.url !== undefined ){self.location =  d.url}}) 
-//     .angle(Math.PI)  // 180 degrees in radians !
-//     .strokeStyle(radar_data[i].color)
-//     .fillStyle(radar_data[i].color)
-//     .shape(function(d) {return (d.movement === 't' ? "triangle" : "circle");})         
-//     .anchor("center")
-//         .add(pv.Label)
-//         .text(function(d) {return total_index++;}) 
-//         .textBaseline("middle")
-//         .textStyle("white");            
-// }
-
-
 //Quadrant Ledgends
 var radar_quadrant_ctr=1;
 var quadrantFontSize = 18;
@@ -69,84 +41,90 @@ var stageHeadingCount = 0;
 var lastRadius = 0;
 var lastQuadrant='';
 var spacer = 6;
-var fontSize = 10;
+var spacer_header = 6;
+var fontSize = 12;
 var total_index = 1;
 
-//TODO: Super fragile: re-order the items, by radius, in order to logically group by the rings.
 for (var i = 0; i < radar_data.length; i++) {
-    //adjust top by the number of headings.
+    
+    // Add Quadrant Legend
     if (lastQuadrant != radar_data[i].quadrant) {
+		// Add Quadrant Label
         radar.add(pv.Label)         
             .left( radar_data[i].left )         
             .top( radar_data[i].top )  
-            .text(  radar_data[i].quadrant )		 
+            .text( radar_data[i].quadrant )		 
             .strokeStyle( radar_data[i].color )
             .fillStyle( radar_data[i].color )                    
-            .font(quadrantFontSize + "px sans-serif");
+            .font("bold " + quadrantFontSize + "px sans-serif");
          
         lastQuadrant = radar_data[i].quadrant;
-
     }
 
     var itemsByStage = _.groupBy(radar_data[i].items, function(item) {return Math.floor(item.pc.r / 100)});
     var offsetIndex = 0;
-    for (var stageIdx in _(itemsByStage).keys()) {
-
-        if (stageIdx > 0) {
-            offsetIndex = offsetIndex + itemsByStage[stageIdx-1].length + 1; 
-            console.log("offsetIndex = " + itemsByStage[stageIdx-1].length, offsetIndex );
-        }
-
+    var keys = _(itemsByStage).keys();
+    for (var k = 0; k < keys.length; k++) {
+		var stageIdx = Number(keys[k]);
+		
+		if(stageIdx > 0) {
+			offsetIndex = 0;
+			for(var j = 0; j < stageIdx; j++) {
+				if(itemsByStage[j]) {
+					offsetIndex = offsetIndex + itemsByStage[j].length + 1; 
+				}
+			}
+		}
+		
+		// Add Stage Header
         radar.add(pv.Label)         
             .left( radar_data[i].left + headingFontSize )
-            .top( radar_data[i].top + quadrantFontSize + spacer + (stageIdx * headingFontSize) + (offsetIndex * fontSize) )
+            .top( radar_data[i].top + quadrantFontSize + spacer + (stageIdx * headingFontSize) + (offsetIndex * fontSize) + (stageIdx * spacer_header))
             .text( radar_arcs[stageIdx].name)
             .strokeStyle( '#cccccc' )
             .fillStyle( '#cccccc')                    
-            .font(headingFontSize + "px Courier New");
+            .font("bold " + headingFontSize + "px Courier New");
 
-    radar.add(pv.Label)             
-        .left( radar_data[i].left )         
-        .top( radar_data[i].top + quadrantFontSize + spacer + (stageIdx * headingFontSize) + (offsetIndex * fontSize) )
-        .strokeStyle( radar_data[i].color )
-        .fillStyle( radar_data[i].color )                    
-        .add( pv.Dot )            
-            .def("i", radar_data[i].top + quadrantFontSize + spacer + (stageIdx * headingFontSize) + spacer  + (offsetIndex * fontSize) )
-            .data(itemsByStage[stageIdx])            
-            .top( function() { return ( this.i() + (this.index * fontSize) );} )   
-            .shape( function(d) {return (d.movement === 't' ? "triangle" : "circle");})                 
-            .cursor( function(d) { return ( d.url !== undefined ? "pointer" : "auto" ); })                                                            
-            .event("click", function(d) { if ( d.url !== undefined ){self.location =  d.url}}) 
-            .size(fontSize) 
-            .angle(45)            
-            .anchor("right")                
-                .add(pv.Label)                
-                .text(function(d) {return radar_quadrant_ctr++ + ". " + d.name;} );
+		// Add List of Items
+		radar.add(pv.Label)             
+			.left( radar_data[i].left )         
+			.top( radar_data[i].top + quadrantFontSize + spacer + (stageIdx * headingFontSize) + (offsetIndex * fontSize) + (stageIdx * spacer_header))
+			.strokeStyle( radar_data[i].color )
+			.fillStyle( radar_data[i].color )           
+			.add( pv.Dot )            
+				.def("i", radar_data[i].top + quadrantFontSize + spacer + (stageIdx * headingFontSize) + spacer  + (offsetIndex * fontSize) + (stageIdx * spacer_header))
+				.data(itemsByStage[stageIdx])            
+				.top( function() { return ( this.i() + (this.index * (fontSize)) );} )   
+				.shape( function(d) {return (d.movement === 't' ? "triangle" : "circle");})                 
+				.cursor( function(d) { return ( d.url !== undefined ? "pointer" : "auto" ); })                                                            
+				.event("click", function(d) { if ( d.url !== undefined ){self.location =  d.url}}) 
+				.size(fontSize) 
+				.angle(45)            
+				.anchor("right")                
+				.add(pv.Label)                
+					.font(fontSize + "px Courier New")
+					.text(function(d) {return radar_quadrant_ctr++ + ". " + d.name;} );
 
-    radar.add(pv.Dot)       
-      .def("active", false)
-      .data(itemsByStage[stageIdx])
-      .size( function(d) { return ( d.blipSize !== undefined ? d.blipSize : 70 ); })
-      .left(function(d) { var x = polar_to_raster(d.pc.r, d.pc.t)[0];
-                          //console.log("name:" + d.name + ", x:" + x); 
-                          return x;})
-      .bottom(function(d) { var y = polar_to_raster(d.pc.r, d.pc.t)[1];                                 
-                            //console.log("name:" + d.name + ", y:" + y); 
-                            return y;})
-      .title(function(d) { return d.name;})		 
-      .cursor( function(d) { return ( d.url !== undefined ? "pointer" : "auto" ); })                                                            
-      .event("click", function(d) { if ( d.url !== undefined ){self.location =  d.url}}) 
-      .angle(Math.PI)  // 180 degrees in radians !
-      .strokeStyle(radar_data[i].color)
-      .fillStyle(radar_data[i].color)
-      .shape(function(d) {return (d.movement === 't' ? "triangle" : "circle");})         
-      .anchor("center")
-          .add(pv.Label)
-          .text(function(d) {return total_index++;}) 
-          .textBaseline("middle")
-          .textStyle("white");            
-
-
+		radar.add(pv.Dot)       
+		  .def("active", false)
+		  .data(itemsByStage[stageIdx])
+		  .size( function(d) { return ( d.blipSize !== undefined ? d.blipSize : 70 ); })
+		  .left(function(d) { var x = polar_to_raster(d.pc.r, d.pc.t)[0];
+							  return x;})
+		  .bottom(function(d) { var y = polar_to_raster(d.pc.r, d.pc.t)[1];                                 
+								return y;})
+		  .title(function(d) { return d.name;})		 
+		  .cursor( function(d) { return ( d.url !== undefined ? "pointer" : "auto" ); })                                                            
+		  .event("click", function(d) { if ( d.url !== undefined ){self.location =  d.url}}) 
+		  .angle(Math.PI)  // 180 degrees in radians !
+		  .strokeStyle(radar_data[i].color)
+		  .fillStyle(radar_data[i].color)
+		  .shape(function(d) {return (d.movement === 't' ? "triangle" : "circle");})         
+		  .anchor("center")
+			  .add(pv.Label)
+			  .text(function(d) {return total_index++;}) 
+			  .textBaseline("middle")
+			  .textStyle("white");       
     }
 }      
        
